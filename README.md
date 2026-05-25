@@ -1,2 +1,2 @@
-# b2b3
-retailer3
+# b2b team 1
+buyer info
