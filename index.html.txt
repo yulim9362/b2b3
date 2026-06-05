@@ -1,0 +1,81 @@
+HTML
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>B2B 거래처 조회 매니저</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-100 p-10">
+
+    <div class="max-w-4xl mx-auto bg-teal-800 text-white p-5 rounded-t-lg shadow">
+        <h1 class="text-xl font-bold">B2B 매니저</h1>
+        <p class="text-xs text-teal-200 mt-1">거래처 정보 조회 시스템 (테스트 버전)</p>
+    </div>
+
+    <div class="max-w-4xl mx-auto bg-white p-5 shadow flex gap-2">
+        <input type="text" id="searchInput" placeholder="검색할 거래처명 또는 코드를 입력하세요" class="border p-2 flex-grow rounded">
+        <button onclick="searchCSV()" class="bg-teal-700 text-white px-6 py-2 rounded font-bold hover:bg-teal-600">검색</button>
+    </div>
+
+    <div class="max-w-4xl mx-auto bg-white p-5 rounded-b-lg shadow mt-1 border-t">
+        <h3 class="font-bold text-gray-500 mb-4">거래처 기본 정보</h3>
+        <div id="resultArea" class="text-gray-500 py-4 text-center">
+            검색어를 입력하고 검색 버튼을 눌러주세요.
+        </div>
+    </div>
+
+    <script>
+        function searchCSV() {
+            var keyword = document.getElementById("searchInput").value.trim();
+            if(!keyword) { alert("검색어를 입력하세요!"); return; }
+
+            // 같은 저장소에 있는 CSV 파일 이름을 정확히 적어줍니다.
+            var csvFileName = "B2B1팀 거래처별 관리 시트 - 거래처별 정보.csv";
+            
+            fetch(csvFileName)
+                .then(response => response.text())
+                .then(text => {
+                    // CSV 데이터를 줄바꿈 기준으로 쪼갬
+                    var lines = text.split("\n");
+                    var headers = lines[0].split(","); // 첫 줄 (컬럼명)
+                    var found = false;
+                    var htmlContent = "<div class='grid grid-cols-2 gap-4'>";
+
+                    // 데이터 행들을 돌며 검색어 매칭
+                    for (var i = 1; i < lines.length; i++) {
+                        if (lines[i].includes(keyword)) {
+                            var rowData = lines[i].split(",");
+                            
+                            // 검색된 데이터를 화면에 이쁘게 출력하기 위해 조립
+                            for(var j=0; j<headers.length; j++) {
+                                if(rowData[j]) {
+                                    htmlContent += `
+                                        <div class='border-b pb-2'>
+                                            <p class='text-xs text-gray-400'>${headers[j].trim()}</p>
+                                            <p class='font-bold text-gray-800 mt-1'>${rowData[j].trim()}</p>
+                                        </div>
+                                    `;
+                                }
+                            }
+                            found = true;
+                            break; // 하나 찾으면 중단
+                        }
+                    }
+
+                    htmlContent += "</div>";
+
+                    if (found) {
+                        document.getElementById("resultArea").innerHTML = htmlContent;
+                    } else {
+                        document.getElementById("resultArea").innerHTML = "<p class='text-red-500'>검색 결과가 없습니다.</p>";
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("데이터를 불러오는 중 오류가 발생했습니다.");
+                });
+        }
+    </script>
+</body>
+</html>
